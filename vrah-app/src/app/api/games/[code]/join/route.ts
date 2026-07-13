@@ -8,30 +8,38 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ code: string }> }
 ) {
-  const supabase = createClient(supabaseUrl, supabaseServiceKey)
-  const { code } = await params
-  const { playerId } = await request.json()
+  try {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const { code } = await params
+    const { playerId } = await request.json()
 
-  const { data: game } = await supabase
-    .from('games')
-    .select('id')
-    .eq('code', code)
-    .single()
+    const { data: game } = await supabase
+      .from('games')
+      .select('id')
+      .eq('code', code)
+      .single()
 
-  if (!game) {
-    return NextResponse.json({ error: 'Hra nenalezena' }, { status: 404 })
+    if (!game) {
+      return NextResponse.json({ error: 'Hra nenalezena' }, { status: 404 })
+    }
+
+    const { data: existingPlayer } = await supabase
+      .from('players')
+      .select('id')
+      .eq('game_id', game.id)
+      .eq('id', playerId)
+      .single()
+
+    if (!existingPlayer) {
+      return NextResponse.json({ error: 'Hráč nenalezen v této hře' }, { status: 404 })
+    }
+
+    return NextResponse.json({ playerId: existingPlayer.id })
+  } catch (err) {
+    console.error('POST /api/games/[code]/join error:', err)
+    return NextResponse.json(
+      { error: 'Interní chyba serveru' },
+      { status: 500 }
+    )
   }
-
-  const { data: existingPlayer } = await supabase
-    .from('players')
-    .select('id')
-    .eq('game_id', game.id)
-    .eq('id', playerId)
-    .single()
-
-  if (!existingPlayer) {
-    return NextResponse.json({ error: 'Hráč nenalezen v této hře' }, { status: 404 })
-  }
-
-  return NextResponse.json({ playerId: existingPlayer.id })
 }

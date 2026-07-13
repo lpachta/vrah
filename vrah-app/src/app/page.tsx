@@ -76,16 +76,27 @@ export default function Home() {
   const createGame = async () => {
     if (players.length < 2) return
 
-    const res = await fetch('/api/games', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ players }),
-    })
+    try {
+      const res = await fetch('/api/games', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ players }),
+      })
 
-    const data = await res.json()
-    if (data.code) {
-      localStorage.setItem('vrah-session', JSON.stringify({ code: data.code, role: 'admin' }))
-      router.push(`/join?code=${data.code}`)
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Neznámá chyba' }))
+        alert(`Chyba: ${err.error}`)
+        return
+      }
+
+      const data = await res.json()
+      if (data.code) {
+        localStorage.setItem('vrah-session', JSON.stringify({ code: data.code, role: 'admin' }))
+        router.push(`/join?code=${data.code}`)
+      }
+    } catch (err) {
+      console.error('createGame error:', err)
+      alert('Chyba při připojení k serveru')
     }
   }
 

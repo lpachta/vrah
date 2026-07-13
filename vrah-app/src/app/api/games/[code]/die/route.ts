@@ -8,69 +8,77 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ code: string }> }
 ) {
-  const supabase = createClient(supabaseUrl, supabaseServiceKey)
-  const { code } = await params
-  const { playerId } = await request.json()
+  try {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const { code } = await params
+    const { playerId } = await request.json()
 
-  if (!playerId) {
-    return NextResponse.json({ error: 'Chybějící parametr' }, { status: 400 })
-  }
+    if (!playerId) {
+      return NextResponse.json({ error: 'Chybějící parametr' }, { status: 400 })
+    }
 
-  const { data: game } = await supabase
-    .from('games')
-    .select('id')
-    .eq('code', code)
-    .single()
+    const { data: game } = await supabase
+      .from('games')
+      .select('id')
+      .eq('code', code)
+      .single()
 
-  if (!game) {
-    return NextResponse.json({ error: 'Hra nenalezena' }, { status: 404 })
-  }
+    if (!game) {
+      return NextResponse.json({ error: 'Hra nenalezena' }, { status: 404 })
+    }
 
-  const { data: player } = await supabase
-    .from('players')
-    .select('*')
-    .eq('id', playerId)
-    .eq('game_id', game.id)
-    .single()
+    const { data: player } = await supabase
+      .from('players')
+      .select('*')
+      .eq('id', playerId)
+      .eq('game_id', game.id)
+      .single()
 
-  if (!player || !player.alive) {
-    return NextResponse.json({ error: 'Hráč nenalezen nebo je mrtvý' }, { status: 400 })
-  }
+    if (!player || !player.alive) {
+      return NextResponse.json({ error: 'Hráč nenalezen nebo je mrtvý' }, { status: 400 })
+    }
 
-  await supabase
-    .from('players')
-    .update({ alive: false })
-    .eq('id', playerId)
-
-  const { data: killer } = await supabase
-    .from('players')
-    .select('id')
-    .eq('game_id', game.id)
-    .eq('target_id', playerId)
-    .eq('alive', true)
-    .single()
-
-  if (killer) {
     await supabase
       .from('players')
-      .update({ target_id: player.original_target_id })
-      .eq('id', killer.id)
-  }
+      .update({ alive: false })
+      .eq('id', playerId)
 
-  const { data: alivePlayers } = await supabase
-    .from('players')
-    .select('id')
-    .eq('game_id', game.id)
-    .eq('alive', true)
+    const { data: killer } = await supabase
+      .from('players')
+      .select('id')
+      .eq('game_id', game.id)
+      .eq('target_id', playerId)
+      .eq('alive', true)
+      .single()
 
-  if (alivePlayers && alivePlayers.length <= 1) {
-    if (alivePlayers.length === 1) {
+    if (killer) {
       await supabase
-        .from('games')
-        .update({ winner_id: alivePlayers[0].id })
-        .eq('id', game.id)
+        .from('players')
+        .update({ target_id: player.original_target_id })
+        .eq('id', killer.id)
     }
-  }
 
-  return NextResponse.json({ success: true })
+    const { data: alivePlayers } = await supabase
+      .from('players')
+      .select('id')
+      .eq('game_id', game.id)
+      .eq('alive', true)
+
+    if (alivePlayers && alivePlayers.length <= 1) {
+      if (alivePlayers.length === 1) {
+        await supabase
+          .from('games')
+          .update({ winner_id: alivePlayers[0].id })
+          .eq('id', game.id)
+      }
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    console.error('POST /api/games/[code]/die error:', err)
+    return NextResponse.json(
+      { error: 'Interní chyba serveru' },
+      { status: 500 }
+    )
+  }
 }
