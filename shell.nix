@@ -5,7 +5,6 @@ in
 
 pkgs.mkShellNoCC {
   packages = with pkgs; [
-    cowsay
-    lolcat
+    typescript
   ];
 }
