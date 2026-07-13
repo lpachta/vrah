@@ -8,15 +8,21 @@ Hra trvá den, až dva. Přihlášení je pouze přes kód. Více zařízení.
 
 Aplikace slouží k rozlosování obětí v rámci táborové hry. Zabíjení probíhá IRL. Aplikace slouží pouze k přehladu jednotlivých hráčů o jejich momentálním cíli a změně tohoto cíle, když má splněno.
 
+RLS zapnuto s permissive politikami — aplikace je jednoduchá táborová hra, bez auth. Bezpečnostní riziko minimální.
+
 ## UI
 
 ### Panel vložení
 
 Jeden uživatel zadá všechny uživatele. Seznam se dá importovat ze souboru, nebo z dříve hrané hry. On sám se nesmí dozvědět žádné vztahy mimo svou oběť, kterou se dozví stejným způsobem, jako ostatní. Dostane kód "herní místnosti", který nasdílí ostatním hráčům. Admin hraje taky. To je hlavní účel této aplikace.
 
-S katždou hrou získá admin template. Jak soubor, tak cache.
+S katždou hrou získá admin template. Jak soubor, tak cache. Soubor je ve formátu JSON.
 
 Vizuálně seznam. 
+
+Admin není zvlášť označen v DB. prostě je to hráč který vytvořil hru. Nemá žádné speciální oprávnění kromě možnosti vytvořit novou hru (přes API).
+
+Session se řeší přes localStorage — game_code + player_id se uloží. Při každém načtení stránky se ověří zda je session stále platná.
 
 ### Panel zadání kódu 
 
@@ -26,13 +32,15 @@ Vizuálně jako v Kahootu.
 
 ### Panel výběru postavy
 
-Každý uživatel si na seznamu hráčů zvolí sám sebe. Poté dostane varování, aby zkontroloval, zda opravdu klikl na sebe, aby se omylem nedověděl, oběť někoho jiného. Pokud se tak stane, musí to říct adminovi, který udělá novou hru a relos.
+Každý uživatel si na seznamu hráčů zvolí sám sebe. Poté dostane varování, aby zkontroloval, zda opravdu klikl na sebe, aby se omylem nedověděl, oběť někoho jiného. Pokud se tak stane, musí to říct adminovi, který udělá novou hru a relos. Admin má tlačítko "Nová hra" které smaže aktuální hru a vytvoří novou se stejným seznamem hráčů.
 
 ### Panel zobrazení oběti 
 
 Uživatel se po zvolení své postavy dozví svou oběť. Po zavraždění oběti může hráč odkliknolut tlačítko, že byla jeho oběť zavražděna. Zavražděné oběti přijde upozornění, že byla zavražděna a musí odkliknout, to že byla zavražděna. Po označení své postavy za mrtvou, získá vrah svou další oběť. Aby se člověk mohl označit za mrtvou, nemusí dostat notifikaci o své smrti. 
 
 Vizuálně velký obdélník s jménem mrtvoly a dvě tlačítka vespod - Potvrdit smrt a Potvrdit vraždu.
+
+Když vrah potvrdí vraždu, oběť to uvidí až se příště připojí/obnoví stránku. Žádné push notifikace — aplikace je jednoduchá, vše se řeší přes poll/refetch.
 
 ### Panel výhry
 

@@ -12,6 +12,10 @@ export async function POST(
   const { code } = await params
   const { playerId } = await request.json()
 
+  if (!playerId) {
+    return NextResponse.json({ error: 'Chybějící parametr' }, { status: 400 })
+  }
+
   const { data: game } = await supabase
     .from('games')
     .select('id')
@@ -38,26 +42,19 @@ export async function POST(
     .update({ alive: false })
     .eq('id', playerId)
 
-  if (player.killer_id) {
+  const { data: killer } = await supabase
+    .from('players')
+    .select('id')
+    .eq('game_id', game.id)
+    .eq('target_id', playerId)
+    .eq('alive', true)
+    .single()
+
+  if (killer) {
     await supabase
       .from('players')
       .update({ target_id: player.original_target_id })
-      .eq('id', player.killer_id)
-  } else {
-    const { data: killer } = await supabase
-      .from('players')
-      .select('id')
-      .eq('game_id', game.id)
-      .eq('target_id', playerId)
-      .eq('alive', true)
-      .single()
-
-    if (killer) {
-      await supabase
-        .from('players')
-        .update({ target_id: player.original_target_id })
-        .eq('id', killer.id)
-    }
+      .eq('id', killer.id)
   }
 
   const { data: alivePlayers } = await supabase
@@ -66,11 +63,13 @@ export async function POST(
     .eq('game_id', game.id)
     .eq('alive', true)
 
-  if (alivePlayers && alivePlayers.length === 1) {
-    await supabase
-      .from('games')
-      .update({ winner_id: alivePlayers[0].id })
-      .eq('id', game.id)
+  if (alivePlayers && alivePlayers.length <= 1) {
+    if (alivePlayers.length === 1) {
+      await supabase
+        .from('games')
+        .update({ winner_id: alivePlayers[0].id })
+        .eq('id', game.id)
+    }
   }
 
   return NextResponse.json({ success: true })

@@ -1,6 +1,7 @@
 export interface Game {
   id: string
   code: string
+  winner_id: string | null
   created_at: string
 }
 

@@ -3,21 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { QRCodeSVG } from 'qrcode.react'
-
-interface Player {
-  id: string
-  name: string
-  alive: boolean
-  target_id: string | null
-  original_target_id: string | null
-  killer_id: string | null
-}
-
-interface Game {
-  id: string
-  code: string
-  winner_id: string | null
-}
+import type { Player, Game } from '@/lib/types'
 
 export default function PlayPage() {
   const params = useParams()
@@ -29,25 +15,29 @@ export default function PlayPage() {
   const [loading, setLoading] = useState(true)
 
   const loadGame = useCallback(async () => {
-    const session = JSON.parse(localStorage.getItem('vrah-session') || '{}')
-    if (!session.playerId) return
+    try {
+      const raw = localStorage.getItem('vrah-session')
+      if (!raw) return
+      const session = JSON.parse(raw)
+      if (!session.playerId) return
 
-    const res = await fetch(`/api/games/${code}`)
-    const data = await res.json()
+      const res = await fetch(`/api/games/${code}`)
+      const data = await res.json()
 
-    if (data.game) setGame(data.game)
-    if (data.players) {
-      setPlayers(data.players)
-      const mePlayer = data.players.find((p: Player) => p.id === session.playerId)
-      setMe(mePlayer || null)
+      if (data.game) setGame(data.game)
+      if (data.players) {
+        setPlayers(data.players)
+        const mePlayer = data.players.find((p: Player) => p.id === session.playerId)
+        setMe(mePlayer || null)
 
-      if (mePlayer && mePlayer.alive && mePlayer.target_id) {
-        const target = data.players.find((p: Player) => p.id === mePlayer.target_id)
-        setVictim(target || null)
-      } else {
-        setVictim(null)
+        if (mePlayer && mePlayer.alive && mePlayer.target_id) {
+          const target = data.players.find((p: Player) => p.id === mePlayer.target_id)
+          setVictim(target || null)
+        } else {
+          setVictim(null)
+        }
       }
-    }
+    } catch {}
     setLoading(false)
   }, [code])
 
@@ -107,23 +97,6 @@ export default function PlayPage() {
         <div className="text-center">
           <h1 className="text-5xl font-bold mb-4">JSI MRTVÝ</h1>
           <p className="text-xl text-gray-400">Čekáš na konec hry...</p>
-        </div>
-      </div>
-    )
-  }
-
-  const showDeathNotification = me.killer_id !== null && me.alive
-
-  if (showDeathNotification) {
-    const killer = players.find(p => p.id === me!.killer_id)
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-red-800 text-white p-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">BYL JSI ZAVRAŽDĚN</h1>
-          <p className="text-xl mb-2">Zabil tě: <strong>{killer?.name || 'Neznámý'}</strong></p>
-          <button onClick={confirmDeath} className="mt-8 bg-white text-red-800 px-8 py-4 rounded text-xl font-bold">
-            Potvrdit smrt
-          </button>
         </div>
       </div>
     )

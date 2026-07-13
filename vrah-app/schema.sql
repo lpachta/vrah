@@ -21,7 +21,7 @@ create table players (
   killer_id uuid references players(id)
 );
 
--- RLS disabled for simplicity
+-- RLS enabled with permissive policies (no auth needed for this game)
 alter table games enable row level security;
 alter table players enable row level security;
 
