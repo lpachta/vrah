@@ -58,7 +58,7 @@ export default function Home() {
       try {
         const data = JSON.parse(ev.target?.result as string)
         if (Array.isArray(data)) setPlayers(data)
-      } catch {}
+      } catch { }
     }
     reader.readAsText(file)
   }
@@ -145,6 +145,9 @@ export default function Home() {
           ))}
         </div>
       )}
+      <div>
+        Version 1.0
+      </div>
     </div>
   )
 }
