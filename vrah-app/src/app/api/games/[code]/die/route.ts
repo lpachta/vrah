@@ -43,19 +43,26 @@ export async function POST(
       .update({ alive: false })
       .eq('id', playerId)
 
-    const { data: killer } = await supabase
-      .from('players')
-      .select('id')
-      .eq('game_id', game.id)
-      .eq('target_id', playerId)
-      .eq('alive', true)
-      .single()
-
-    if (killer) {
+    if (player.killer_id) {
       await supabase
         .from('players')
         .update({ target_id: player.original_target_id })
-        .eq('id', killer.id)
+        .eq('id', player.killer_id)
+    } else {
+      const { data: killer } = await supabase
+        .from('players')
+        .select('id')
+        .eq('game_id', game.id)
+        .eq('target_id', playerId)
+        .eq('alive', true)
+        .single()
+
+      if (killer) {
+        await supabase
+          .from('players')
+          .update({ target_id: player.original_target_id })
+          .eq('id', killer.id)
+      }
     }
 
     const { data: alivePlayers } = await supabase

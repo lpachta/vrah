@@ -2,163 +2,66 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { Suspense } from 'react'
 
-const STORAGE_KEY = 'vrah-templates'
-
-interface Template {
-  name: string
-  players: string[]
-}
-
-export default function Home() {
+function JoinContent() {
   const router = useRouter()
-  const [players, setPlayers] = useState<string[]>([])
-  const [input, setInput] = useState('')
-  const [templates, setTemplates] = useState<Template[]>([])
+  const [code, setCode] = useState('')
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) setTemplates(JSON.parse(saved))
-  }, [])
-
-  const addPlayer = () => {
-    if (input.trim() && !players.includes(input.trim())) {
-      setPlayers([...players, input.trim()])
-      setInput('')
-    }
-  }
-
-  const removePlayer = (name: string) => {
-    setPlayers(players.filter(p => p !== name))
-  }
-
-  const saveTemplate = () => {
-    const name = prompt('Název template:')
-    if (!name) return
-    const updated = [...templates.filter(t => t.name !== name), { name, players }]
-    setTemplates(updated)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-  }
-
-  const loadTemplate = (template: Template) => {
-    setPlayers(template.players)
-  }
-
-  const deleteTemplate = (name: string) => {
-    const updated = templates.filter(t => t.name !== name)
-    setTemplates(updated)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-  }
-
-  const importFromFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      try {
-        const data = JSON.parse(ev.target?.result as string)
-        if (Array.isArray(data)) setPlayers(data)
-      } catch { }
-    }
-    reader.readAsText(file)
-  }
-
-  const exportToFile = () => {
-    const blob = new Blob([JSON.stringify(players, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'vrah-players.json'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  const createGame = async () => {
-    if (players.length < 2) return
-
-    try {
-      const res = await fetch('/api/games', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ players }),
-      })
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Neznámá chyba' }))
-        alert(`Chyba: ${err.error}`)
-        return
+    const saved = localStorage.getItem('vrah-session')
+    if (saved) {
+      const session = JSON.parse(saved)
+      if (session.code && session.playerId) {
+        router.push(`/${session.code}/play`)
       }
-
-      const data = await res.json()
-      if (data.code) {
-        localStorage.setItem('vrah-session', JSON.stringify({ code: data.code, role: 'admin' }))
-        router.push(`/join?code=${data.code}`)
-      }
-    } catch (err) {
-      console.error('createGame error:', err)
-      alert('Chyba při připojení k serveru')
     }
+  }, [router])
+
+  const joinGame = async () => {
+    if (!code.trim()) return
+    const upperCode = code.toUpperCase().trim()
+
+    const res = await fetch(`/api/games/${upperCode}`)
+    const data = await res.json()
+
+    if (data.error) {
+      setError('Hra nenalezena')
+      return
+    }
+
+    router.push(`/${upperCode}/select`)
   }
 
   return (
-    <div className="min-h-screen p-8 max-w-lg mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Vytvoř hru</h1>
-
-      <div className="flex gap-2 mb-4">
+    <div className="min-h-screen flex items-center justify-center p-8">
+      <div className="w-full max-w-sm text-center">
+        <h1 className="text-4xl font-bold mb-8">Vrah</h1>
         <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && addPlayer()}
-          className="flex-1 border p-2 rounded"
-          placeholder="Jméno hráče"
+          value={code}
+          onChange={e => { setCode(e.target.value); setError('') }}
+          onKeyDown={e => e.key === 'Enter' && joinGame()}
+          className="w-full text-center text-2xl tracking-widest border-2 p-4 rounded mb-4 uppercase"
+          placeholder="Kód hry"
+          maxLength={6}
         />
-        <button onClick={addPlayer} className="bg-blue-500 text-white px-4 py-2 rounded">
-          Přidej
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+        <button onClick={joinGame} className="w-full bg-blue-500 text-white text-xl py-3 rounded mb-4">
+          Vstoupit
         </button>
-      </div>
-
-      <ul className="mb-4 divide-y">
-        {players.map((p) => (
-          <li key={p} className="flex justify-between items-center py-2">
-            <span>{p}</span>
-            <button onClick={() => removePlayer(p)} className="text-red-500 text-sm">odebrat</button>
-          </li>
-        ))}
-      </ul>
-
-      <div className="flex gap-2 mb-4 flex-wrap">
-        <button onClick={createGame} disabled={players.length < 2} className="bg-green-500 text-white px-4 py-2 rounded disabled:opacity-50">
-          Vytvoř hru
-        </button>
-        <button onClick={saveTemplate} disabled={players.length === 0} className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50">
-          Ulož template
-        </button>
-        <button onClick={exportToFile} disabled={players.length === 0} className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50">
-          Exportovat
-        </button>
-        <label className="bg-gray-500 text-white px-4 py-2 rounded cursor-pointer">
-          Importovat
-          <input type="file" accept=".json" onChange={importFromFile} className="hidden" />
-        </label>
-      </div>
-
-      {templates.length > 0 && (
-        <div className="mt-6">
-          <h2 className="text-lg font-semibold mb-2">Templatey</h2>
-          {templates.map(t => (
-            <div key={t.name} className="flex justify-between items-center py-1">
-              <span className="text-sm">{t.name} ({t.players.length} hráčů)</span>
-              <div className="flex gap-2">
-                <button onClick={() => loadTemplate(t)} className="text-blue-500 text-sm">načíst</button>
-                <button onClick={() => deleteTemplate(t.name)} className="text-red-500 text-sm">smazat</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-      <div>
-        Version 1.0
+        <a href="/create" className="text-gray-400 text-sm hover:underline">
+          Vytvoř novou hru
+        </a>
       </div>
     </div>
+  )
+}
+
+export default function JoinPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Načítání...</div>}>
+      <JoinContent />
+    </Suspense>
   )
 }

@@ -53,30 +53,14 @@ export async function POST(
       return NextResponse.json({ error: 'Tato oběť není tvůj cíl' }, { status: 403 })
     }
 
-    await supabase
-      .from('players')
-      .update({ alive: false })
-      .eq('id', victimId)
-
-    await supabase
-      .from('players')
-      .update({ target_id: victim.original_target_id })
-      .eq('id', killerId)
-
-    const { data: alivePlayers } = await supabase
-      .from('players')
-      .select('id')
-      .eq('game_id', game.id)
-      .eq('alive', true)
-
-    if (alivePlayers && alivePlayers.length <= 1) {
-      if (alivePlayers.length === 1) {
-        await supabase
-          .from('games')
-          .update({ winner_id: alivePlayers[0].id })
-          .eq('id', game.id)
-      }
+    if (victim.killer_id) {
+      return NextResponse.json({ error: 'Vražda už byla potvrzena' }, { status: 400 })
     }
+
+    await supabase
+      .from('players')
+      .update({ killer_id: killerId })
+      .eq('id', victimId)
 
     return NextResponse.json({ success: true })
   } catch (err) {

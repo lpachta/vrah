@@ -5,58 +5,34 @@ import { shuffle } from '@/lib/game'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-export async function GET() {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ code: string }> }
+) {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
-    const { data: games } = await supabase
-      .from('games')
-      .select('id, code, created_at')
-      .order('created_at', { ascending: false })
-      .limit(20)
-
-    if (!games) {
-      return NextResponse.json({ games: [] })
-    }
-
-    const gamesWithPlayers = await Promise.all(
-      games.map(async (game) => {
-        const { data: players } = await supabase
-          .from('players')
-          .select('name')
-          .eq('game_id', game.id)
-
-        return {
-          ...game,
-          players: players?.map((p) => p.name) || [],
-        }
-      })
-    )
-
-    return NextResponse.json({ games: gamesWithPlayers })
-  } catch (err) {
-    console.error('GET /api/games error:', err)
-    return NextResponse.json(
-      { error: 'Interní chyba serveru' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const { code } = await params
     const { players } = await request.json()
 
     if (!players || players.length < 2) {
       return NextResponse.json({ error: 'Potřeba alespoň 2 hráče' }, { status: 400 })
     }
 
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase()
+    const { data: oldGame } = await supabase
+      .from('games')
+      .select('id')
+      .eq('code', code)
+      .single()
+
+    if (oldGame) {
+      await supabase.from('games').delete().eq('id', oldGame.id)
+    }
+
+    const newCode = Math.random().toString(36).substring(2, 8).toUpperCase()
 
     const { data: game, error: gameError } = await supabase
       .from('games')
-      .insert({ code })
+      .insert({ code: newCode })
       .select()
       .single()
 
@@ -94,9 +70,9 @@ export async function POST(request: NextRequest) {
 
     await Promise.all(updates)
 
-    return NextResponse.json({ code, gameId: game.id })
+    return NextResponse.json({ code: newCode, gameId: game.id })
   } catch (err) {
-    console.error('POST /api/games error:', err)
+    console.error('POST /api/games/[code]/new-game error:', err)
     return NextResponse.json(
       { error: 'Interní chyba serveru' },
       { status: 500 }

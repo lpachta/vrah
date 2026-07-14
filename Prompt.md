@@ -12,9 +12,17 @@ RLS zapnuto s permissive politikami — aplikace je jednoduchá táborová hra, 
 
 ## UI
 
+### Panel zadání kódu 
+
+Toto je default page. Na tomto panelu je tlačítko, kterým se uživatel dostane na panel vložení.
+
+Každý uživatel musí zadat kód hry, aby se mohl dozvědět svou oběť. 
+
+Vizuálně jako v Kahootu.
+
 ### Panel vložení
 
-Jeden uživatel zadá všechny uživatele. Seznam se dá importovat ze souboru, nebo z dříve hrané hry. On sám se nesmí dozvědět žádné vztahy mimo svou oběť, kterou se dozví stejným způsobem, jako ostatní. Dostane kód "herní místnosti", který nasdílí ostatním hráčům. Admin hraje taky. To je hlavní účel této aplikace.
+Jeden uživatel zadá všechny uživatele. Seznam se dá importovat ze souboru, nebo z dříve hrané hry. On sám se nesmí dozvědět žádné vztahy mimo svou oběť, kterou se dozví stejným způsobem, jako ostatní. 
 
 S katždou hrou získá admin template. Jak soubor, tak cache. Soubor je ve formátu JSON.
 
@@ -24,11 +32,11 @@ Admin není zvlášť označen v DB. prostě je to hráč který vytvořil hru. 
 
 Session se řeší přes localStorage — game_code + player_id se uloží. Při každém načtení stránky se ověří zda je session stále platná.
 
-### Panel zadání kódu 
+### Panel zobrazení kódu
 
-Každý uživatel musí zadat kód hry, aby se mohl dozvědět svou oběť. QR kód funguje taky.
+Poté, co uživatel začne novou hru, objeví se mu qr kód s linkem na Panel výběru postavy. Také pod ním je odkaz a tlačítko na clipboard. 
 
-Vizuálně jako v Kahootu.
+Dostane kód "herní místnosti", který nasdílí ostatním hráčům. Admin hraje taky. To je hlavní účel této aplikace.
 
 ### Panel výběru postavy
 
