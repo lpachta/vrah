@@ -127,7 +127,7 @@ export default function CreatePage() {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && addPlayer()}
-          className="flex-1 border p-2 rounded"
+          className="flex-1 border p-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
           placeholder="Jméno hráče"
         />
         <button onClick={addPlayer} className="bg-blue-500 text-white px-4 py-2 rounded">

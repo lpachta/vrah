@@ -63,7 +63,7 @@ export default function SelectPage() {
             <button
               onClick={() => setSelected(p.id)}
               className={`w-full text-left p-4 rounded border-2 text-lg ${
-                selected === p.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                selected === p.id ? 'border-blue-500 bg-blue-50 dark:bg-blue-900' : 'border-gray-200 dark:border-gray-600'
               }`}
             >
               {p.name}

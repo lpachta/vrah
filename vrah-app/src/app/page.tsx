@@ -42,7 +42,7 @@ function JoinContent() {
           value={code}
           onChange={e => { setCode(e.target.value); setError('') }}
           onKeyDown={e => e.key === 'Enter' && joinGame()}
-          className="w-full text-center text-2xl tracking-widest border-2 p-4 rounded mb-4 uppercase"
+          className="w-full text-center text-2xl tracking-widest border-2 p-4 rounded mb-4 uppercase bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
           placeholder="Kód hry"
           maxLength={6}
         />

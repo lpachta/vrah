@@ -158,8 +158,8 @@ export default function PlayPage() {
     <div className="min-h-screen flex flex-col items-center justify-center p-8">
       {iHaveTarget && !targetPendingConfirmation && (
         <>
-          <div className="w-full max-w-sm border-2 border-gray-300 rounded-xl p-8 text-center mb-8">
-            <p className="text-gray-500 mb-2">Tvoje oběť</p>
+          <div className="w-full max-w-sm border-2 border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center mb-8">
+            <p className="text-gray-500 dark:text-gray-400 mb-2">Tvoje oběť</p>
             <h2 className="text-4xl font-bold">{victim!.name}</h2>
           </div>
           <div className="flex gap-4 w-full max-w-sm">
@@ -172,8 +172,8 @@ export default function PlayPage() {
 
       {iHaveTarget && targetPendingConfirmation && (
         <div className="w-full max-w-sm text-center mb-8">
-          <div className="bg-yellow-100 border-2 border-yellow-400 rounded-xl p-6 mb-4">
-            <p className="text-yellow-700 text-lg">
+          <div className="bg-yellow-100 dark:bg-yellow-900 border-2 border-yellow-400 rounded-xl p-6 mb-4">
+            <p className="text-yellow-700 dark:text-yellow-200 text-lg">
               Čekáš na potvrzení smrti hráče <strong>{victim!.name}</strong>
             </p>
           </div>
@@ -182,9 +182,9 @@ export default function PlayPage() {
 
       {iAmKilled && (
         <div className="w-full max-w-sm text-center mb-8">
-          <div className="bg-red-100 border-2 border-red-400 rounded-xl p-8 mb-4">
-            <p className="text-red-700 text-xl mb-2">Byl jsi zavražděn!</p>
-            {myKiller && <p className="text-red-500 text-sm">Vrah: {myKiller.name}</p>}
+          <div className="bg-red-100 dark:bg-red-900 border-2 border-red-400 rounded-xl p-8 mb-4">
+            <p className="text-red-700 dark:text-red-200 text-xl mb-2">Byl jsi zavražděn!</p>
+            {myKiller && <p className="text-red-500 dark:text-red-300 text-sm">Vrah: {myKiller.name}</p>}
           </div>
           <button onClick={confirmDeath} className="w-full bg-red-500 text-white py-4 rounded text-xl font-bold">
             Potvrdit smrt

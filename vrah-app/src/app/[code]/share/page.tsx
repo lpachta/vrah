@@ -30,9 +30,9 @@ export default function SharePage() {
         <h1 className="text-2xl font-bold mb-2">Hra vytvořena!</h1>
         <p className="text-gray-500 mb-8">Sdílej kód s ostatními hráči</p>
 
-        <div className="bg-gray-100 rounded-xl p-6 mb-6">
-          <p className="text-sm text-gray-500 mb-2">Herní kód</p>
-          <p className="text-5xl font-bold tracking-widest mb-4">{code}</p>
+        <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-6 mb-6">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Herní kód</p>
+          <p className="text-5xl font-bold tracking-widest mb-4 text-gray-900 dark:text-white">{code}</p>
           <button
             onClick={copyCode}
             className="bg-blue-500 text-white px-6 py-2 rounded text-sm"
