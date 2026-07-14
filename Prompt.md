@@ -40,7 +40,9 @@ Dostane kód "herní místnosti", který nasdílí ostatním hráčům. Admin hr
 
 ### Panel výběru postavy
 
-Každý uživatel si na seznamu hráčů zvolí sám sebe. Poté dostane varování, aby zkontroloval, zda opravdu klikl na sebe, aby se omylem nedověděl, oběť někoho jiného. Pokud se tak stane, musí to říct adminovi, který udělá novou hru a relos. Admin má tlačítko "Nová hra" které smaže aktuální hru a vytvoří novou se stejným seznamem hráčů.
+Každý uživatel si na seznamu hráčů zvolí sám sebe. Poté dostane varování, aby zkontroloval, zda opravdu klikl na sebe, aby se omylem nedověděl, oběť někoho jiného. Pokud se tak stane, musí to říct adminovi, který udělá novou hru a relos. Admin má tlačítko "Nová hra" které smaže aktuální hru a vytvoří novou se stejným seznamem hráčů. 
+
+Postavy jsou seřazeny abecedně.
 
 ### Panel zobrazení oběti 
 

@@ -58,7 +58,7 @@ export default function SelectPage() {
     <div className="min-h-screen p-8 max-w-lg mx-auto">
       <h1 className="text-2xl font-bold mb-6">Vyber sebe</h1>
       <ul className="space-y-2">
-        {players.map(p => (
+        {[...players].sort((a, b) => a.name.localeCompare(b.name, 'cs')).map(p => (
           <li key={p.id}>
             <button
               onClick={() => setSelected(p.id)}
