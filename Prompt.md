@@ -52,8 +52,8 @@ Když vrah potvrdí vraždu, oběť to uvidí až se příště připojí/obnov�
 
 ### Panel výhry
 
-Poté, co ve hře zbývá pouze jeden hráč, dostane vědět, že vyhrál.
+Poté, co ve hře zbývá pouze jeden hráč, dostane vědět, že vyhrál. Je zde tlačítko na navrácení do Panelu zadání kódu
 
 ### Panel prohry
 
-Poté, co hráč zemře, dostane death screen. 
+Poté, co hráč zemře, dostane death screen. Je zde tlačítko na navrácení do Panelu zadání kódu
