@@ -12,22 +12,17 @@ export async function GET(
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const { code } = await params
 
-    const { data: game } = await supabase
+    const { data: game, error } = await supabase
       .from('games')
-      .select('*')
+      .select('*, players(*)')
       .eq('code', code)
       .single()
 
-    if (!game) {
+    if (error || !game) {
       return NextResponse.json({ error: 'Hra nenalezena' }, { status: 404 })
     }
 
-    const { data: players } = await supabase
-      .from('players')
-      .select('*')
-      .eq('game_id', game.id)
-
-    return NextResponse.json({ game, players })
+    return NextResponse.json({ game, players: game.players })
   } catch (err) {
     console.error('GET /api/games/[code] error:', err)
     return NextResponse.json(

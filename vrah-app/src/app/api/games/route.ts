@@ -9,29 +9,22 @@ export async function GET() {
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    const { data: games } = await supabase
+    const { data: gamesWithPlayers } = await supabase
       .from('games')
-      .select('id, code, created_at')
+      .select('id, code, created_at, players(name)')
       .order('created_at', { ascending: false })
       .limit(20)
 
-    if (!games) {
+    if (!gamesWithPlayers) {
       return NextResponse.json({ games: [] })
     }
 
-    const gamesWithPlayers = await Promise.all(
-      games.map(async (game) => {
-        const { data: players } = await supabase
-          .from('players')
-          .select('name')
-          .eq('game_id', game.id)
-
-        return {
-          ...game,
-          players: players?.map((p) => p.name) || [],
-        }
-      })
-    )
+    return NextResponse.json({
+      games: gamesWithPlayers.map((g) => ({
+        ...g,
+        players: g.players?.map((p: { name: string }) => p.name) || [],
+      })),
+    })
 
     return NextResponse.json({ games: gamesWithPlayers })
   } catch (err) {

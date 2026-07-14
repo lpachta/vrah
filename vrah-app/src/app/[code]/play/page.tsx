@@ -75,6 +75,11 @@ export default function PlayPage() {
     loadGame()
   }
 
+  const leaveGame = () => {
+    localStorage.removeItem('vrah-session')
+    router.push('/')
+  }
+
   const newGame = async () => {
     const adminPlayers = localStorage.getItem('vrah-admin-players')
     if (!adminPlayers) return
@@ -103,7 +108,7 @@ export default function PlayPage() {
           <div className="text-center">
             <h1 className="text-5xl font-bold mb-4">VYHRÁL JSI!</h1>
             <p className="text-xl">Poslední přeživší</p>
-            <button onClick={() => router.push('/')} className="mt-8 bg-green-700 px-6 py-3 rounded text-lg">
+            <button onClick={leaveGame} className="mt-8 bg-green-700 px-6 py-3 rounded text-lg">
               Zpět
             </button>
           </div>
@@ -115,7 +120,7 @@ export default function PlayPage() {
         <div className="text-center">
           <h1 className="text-5xl font-bold mb-4">PROHRÁL JSI</h1>
           <p className="text-xl">Hra skončila</p>
-          <button onClick={() => router.push('/')} className="mt-8 bg-red-700 px-6 py-3 rounded text-lg">
+          <button onClick={leaveGame} className="mt-8 bg-red-700 px-6 py-3 rounded text-lg">
             Zpět
           </button>
         </div>
@@ -129,7 +134,7 @@ export default function PlayPage() {
         <div className="text-center">
           <h1 className="text-5xl font-bold mb-4">JSI MRTVÝ</h1>
           <p className="text-xl text-gray-400">Čekáš na konec hry...</p>
-          <button onClick={() => router.push('/')} className="mt-8 bg-gray-700 px-6 py-3 rounded text-lg">
+          <button onClick={leaveGame} className="mt-8 bg-gray-700 px-6 py-3 rounded text-lg">
             Zpět
           </button>
         </div>
